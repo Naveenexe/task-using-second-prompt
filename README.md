@@ -35,11 +35,13 @@ A mobile-first web application that detects device orientation and displays diff
 
 ## 📱 Orientation Mapping
 
-### **Correct Device Orientations:**
-- **Portrait Upright** (beta≈0°, gamma≈0°) → Alarm Clock
-- **Portrait Upside Down** (beta≈±180°, gamma≈0°) → Timer  
-- **Landscape Right** (beta≈0°, gamma≈90°) → Stopwatch
-- **Landscape Left** (beta≈0°, gamma≈-90°) → Weather
+### **Standard Device Orientations (DeviceOrientationEvent API):**
+- **Portrait Upright** (β≈+90°, γ≈0°) → Alarm Clock ⏰
+- **Portrait Upside Down** (β≈-90°, γ≈0°) → Timer ⏱️  
+- **Landscape Right** (β≈0°, γ≈-90°) → Stopwatch 🏃
+- **Landscape Left** (β≈0°, γ≈+90°) → Weather 🌤️
+
+*All orientations include ±15° tolerance for device/browser variations*
 
 ### **Manual Controls:**
 5-button navigation for devices without orientation support:
