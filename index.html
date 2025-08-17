@@ -308,7 +308,7 @@
             <div id="timer-status" class="status-message" style="display: none;"></div>
         </div>
 
-        <!-- Stopwatch + Weather Screen (Landscape Right) -->
+        <!-- Stopwatch Screen (Landscape Right) -->
         <div id="stopwatch-screen" class="app-screen">
             <h1 class="screen-title">⏱️ Stopwatch</h1>
             <div id="stopwatch-display" class="time-display">00:00:00</div>
@@ -317,16 +317,19 @@
                 <button id="stop-stopwatch-btn" class="btn stop" style="display: none;">Stop</button>
                 <button id="reset-stopwatch-btn" class="btn">Reset</button>
             </div>
-            
+        </div>
+
+        <!-- Weather Screen (Landscape Left) -->
+        <div id="weather-screen" class="app-screen">
+            <h1 class="screen-title">🌤️ Weather Today</h1>
             <div class="weather-section">
-                <h2 class="weather-title">🌤️ Weather Today</h2>
-                <div id="weather-info" class="weather-info">
-                    <div id="weather-loading">Getting weather data<span class="loading"></span></div>
+                <div id="weather-info-main" class="weather-info">
+                    <div id="weather-loading-main">Getting weather data<span class="loading"></span></div>
                 </div>
             </div>
         </div>
 
-        <!-- Default/Landscape Left Screen -->
+        <!-- Default/Guide Screen -->
         <div id="default-screen" class="app-screen active">
             <h1 class="screen-title">📱 AI-First Orientation Clock</h1>
             <p style="font-size: 1.2rem; margin-bottom: 30px;">Rotate your device to access different features:</p>
@@ -338,10 +341,10 @@
                     <strong>📱 Portrait Down:</strong> Timer
                 </div>
                 <div class="feature-item">
-                    <strong>📱 Landscape Right:</strong> Stopwatch + Weather
+                    <strong>📱 Landscape Right:</strong> Stopwatch
                 </div>
                 <div class="feature-item">
-                    <strong>📱 Landscape Left:</strong> This guide
+                    <strong>📱 Landscape Left:</strong> Weather Today
                 </div>
             </div>
             <div class="permission-prompt" id="permission-prompt">
