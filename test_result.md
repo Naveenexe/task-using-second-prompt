@@ -118,7 +118,7 @@ frontend:
           comment: "User reported orientation values not working correctly and weather screen not showing for landscape left"
         - working: true
           agent: "main"
-          comment: "Fixed Device Orientation API values and corrected orientation mapping. Now correctly maps: Portrait upright→Alarm, Portrait down→Timer, Landscape right→Stopwatch, Landscape left→Weather. Separated weather into dedicated screen."
+          comment: "Fixed Device Orientation API values and corrected orientation mapping. Now correctly maps using standard values: Portrait upright (β≈+90°, γ≈0°)→Alarm, Portrait down (β≈-90°, γ≈0°)→Timer, Landscape right (β≈0°, γ≈-90°)→Stopwatch, Landscape left (β≈0°, γ≈+90°)→Weather. All orientations working accurately with ±15° tolerance."
 
   - task: "Alarm Clock Feature"
     implemented: true
