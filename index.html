@@ -518,7 +518,7 @@
             }
             
             // Portrait upside down: beta around 180° or -180°, gamma around 0°
-            if ((Math.abs(beta) > (180 - tolerance) || Math.abs(beta) > (180 - tolerance)) && 
+            if ((Math.abs(beta - 180) < tolerance || Math.abs(beta + 180) < tolerance) && 
                 Math.abs(gamma) < tolerance) {
                 return 'timer';
             }
