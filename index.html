@@ -524,37 +524,31 @@
         }
 
         function determineScreen(beta, gamma) {
-            // Add tolerance for orientation detection
-            const tolerance = 45; // Increased tolerance for better detection
-
             // Handle null values
             if (beta === null || gamma === null) return 'default';
 
             console.log(`🧭 Orientation: beta=${Math.round(beta)}°, gamma=${Math.round(gamma)}°`);
 
-            // Portrait upright: beta around 0°, gamma around 0°
-            if (Math.abs(beta) < tolerance && Math.abs(gamma) < tolerance) {
+            // Portrait upright: beta around 102°, gamma around 0°
+            if (beta > 80 && beta < 120 && Math.abs(gamma) < 20) {
                 console.log('📱 Detected: Portrait Upright -> Alarm Clock');
                 return 'alarm';
             }
             
-            // Portrait upside down: beta around 180° or -180°, gamma around 0°
-            if ((Math.abs(beta - 180) < tolerance || Math.abs(beta + 180) < tolerance) && 
-                Math.abs(gamma) < tolerance) {
+            // Portrait upside down: beta around -102°, gamma around -14°
+            if (beta < -80 && beta > -120 && gamma > -30 && gamma < 5) {
                 console.log('📱 Detected: Portrait Upside Down -> Timer');
                 return 'timer';
             }
             
-            // Landscape right: beta around 0°, gamma around 90°
-            if (Math.abs(beta) < tolerance && 
-                gamma > (90 - tolerance) && gamma <= 90) {
+            // Landscape right: beta around 179°, gamma around 82°
+            if (beta > 160 && beta <= 180 && gamma > 65 && gamma < 100) {
                 console.log('📱 Detected: Landscape Right -> Stopwatch');
                 return 'stopwatch';
             }
             
-            // Landscape left: beta around 0°, gamma around -90°
-            if (Math.abs(beta) < tolerance && 
-                gamma < (-90 + tolerance) && gamma >= -90) {
+            // Landscape left: beta around -175°, gamma around 85°
+            if (beta < -160 && beta >= -180 && gamma > 70 && gamma < 100) {
                 console.log('📱 Detected: Landscape Left -> Weather');
                 return 'weather';
             }
