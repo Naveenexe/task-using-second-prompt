@@ -448,6 +448,13 @@
                     '<p>Device orientation is not supported on this device. You can still use the app by manually selecting features!</p>' +
                     '<button class="btn" onclick="showManualControls()">Show Manual Controls</button>';
             }
+            
+            // Always show manual controls for better usability
+            setTimeout(() => {
+                if (!document.querySelector('.manual-controls')) {
+                    showManualControls();
+                }
+            }, 3000); // Show manual controls after 3 seconds
         }
 
         function showManualControls() {
