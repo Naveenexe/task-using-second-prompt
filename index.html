@@ -578,8 +578,8 @@
                 currentScreen = screenName;
 
                 // Perform screen-specific initialization
-                if (screenName === 'stopwatch' && !weatherLoaded) {
-                    loadWeather();
+                if (screenName === 'weather' && !weatherLoaded) {
+                    loadWeatherMain();
                 }
             }
         }
