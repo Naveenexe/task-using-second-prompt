@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI-First Orientation Clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .app-screen {
+            display: none;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .app-screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .time-display {
+            font-size: 4rem;
+            font-weight: 300;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+
+        .time-input {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 1.2rem;
+            color: white;
+            text-align: center;
+            width: 80px;
+            backdrop-filter: blur(10px);
+        }
+
+        .time-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.8);
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            backdrop-filter: blur(10px);
+            min-width: 120px;
+            font-weight: 600;
+            touch-action: manipulation;
+        }
+
+        .btn:hover, .btn:active {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border-color: #ff6b6b;
+        }
+
+        .btn.success {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            border-color: #2ecc71;
+        }
+
+        .btn.stop {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border-color: #e74c3c;
+        }
+
+        .weather-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+        }
+
+        .weather-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .weather-info {
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .orientation-debug {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            z-index: 1000;
+        }
+
+        .permission-prompt {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .countdown-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            transition: width 0.1s ease;
+        }
+
+        .feature-list {
+            text-align: left;
+            max-width: 300px;
+        }
+
+        .feature-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 480px) {
+            .time-display {
+                font-size: 3rem;
+            }
+            .screen-title {
+                font-size: 2rem;
+            }
+            .btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+                min-width: 100px;
+            }
+            .countdown-display {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .screen-title {
+                font-size: 2rem;
+                margin-bottom: 20px;
+            }
+            .time-display {
+                font-size: 3rem;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Alarm Clock Screen (Portrait Upright) -->
+        <div id="alarm-screen" class="app-screen">
+            <h1 class="screen-title">⏰ Alarm Clock</h1>
+            <div id="current-time" class="time-display">00:00:00</div>
+            <div class="input-group">
+                <input type="number" id="alarm-hour" class="time-input" placeholder="HH" min="0" max="23">
+                <span style="font-size: 1.5rem;">:</span>
+                <input type="number" id="alarm-minute" class="time-input" placeholder="MM" min="0" max="59">
+            </div>
+            <div>
+                <button id="set-alarm-btn" class="btn primary">Set Alarm</button>
+                <button id="cancel-alarm-btn" class="btn" style="display: none;">Cancel Alarm</button>
+            </div>
+            <div id="alarm-status" class="status-message" style="display: none;"></div>
+        </div>
+
+        <!-- Timer Screen (Portrait Upside Down) -->
+        <div id="timer-screen" class="app-screen">
+            <h1 class="screen-title">⏱️ Timer</h1>
+            <div id="timer-display" class="countdown-display">00:00</div>
+            <div class="progress-bar">
+                <div id="timer-progress" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="input-group">
+                <input type="number" id="timer-minutes" class="time-input" placeholder="MM" min="0" max="59">
+                <span style="font-size: 1.5rem;">:</span>
+                <input type="number" id="timer-seconds" class="time-input" placeholder="SS" min="0" max="59">
+            </div>
+            <div>
+                <button id="start-timer-btn" class="btn success">Start Timer</button>
+                <button id="pause-timer-btn" class="btn" style="display: none;">Pause</button>
+                <button id="reset-timer-btn" class="btn" style="display: none;">Reset</button>
+            </div>
+            <div id="timer-status" class="status-message" style="display: none;"></div>
+        </div>
+
+        <!-- Stopwatch + Weather Screen (Landscape Right) -->
+        <div id="stopwatch-screen" class="app-screen">
+            <h1 class="screen-title">⏱️ Stopwatch</h1>
+            <div id="stopwatch-display" class="time-display">00:00:00</div>
+            <div>
+                <button id="start-stopwatch-btn" class="btn success">Start</button>
+                <button id="stop-stopwatch-btn" class="btn stop" style="display: none;">Stop</button>
+                <button id="reset-stopwatch-btn" class="btn">Reset</button>
+            </div>
+            
+            <div class="weather-section">
+                <h2 class="weather-title">🌤️ Weather Today</h2>
+                <div id="weather-info" class="weather-info">
+                    <div id="weather-loading">Getting weather data<span class="loading"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Default/Landscape Left Screen -->
+        <div id="default-screen" class="app-screen active">
+            <h1 class="screen-title">📱 AI-First Orientation Clock</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 30px;">Rotate your device to access different features:</p>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <strong>📱 Portrait Up:</strong> Alarm Clock
+                </div>
+                <div class="feature-item">
+                    <strong>📱 Portrait Down:</strong> Timer
+                </div>
+                <div class="feature-item">
+                    <strong>📱 Landscape Right:</strong> Stopwatch + Weather
+                </div>
+                <div class="feature-item">
+                    <strong>📱 Landscape Left:</strong> This guide
+                </div>
+            </div>
+            <div class="permission-prompt" id="permission-prompt">
+                <p style="margin-bottom: 15px;">This app needs device orientation access to work properly.</p>
+                <button id="request-permission-btn" class="btn primary">Enable Orientation Detection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug info (remove in production) -->
+    <div class="orientation-debug" id="debug-info">
+        Beta: 0°, Gamma: 0°<br>
+        Mode: Default
+    </div>
+
+    <script>
+        // Global variables for app state
+        let currentScreen = 'default';
+        let alarmTime = null;
+        let alarmTimeout = null;
+        let timerInterval = null;
+        let timerStartTime = null;
+        let timerDuration = 0;
+        let timerPaused = false;
+        let timerRemaining = 0;
+        let stopwatchInterval = null;
+        let stopwatchStartTime = null;
+        let stopwatchElapsed = 0;
+        let weatherLoaded = false;
+
+        // Audio context for alerts
+        let audioContext = null;
+
+        // Weather API configuration
+        const WEATHER_API_KEY = '8f82d28a720beb8fcd6a389470464da4';
+        const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            console.log('🚀 AI-First Orientation Clock initializing...');
+            
+            // Initialize audio context on first user interaction
+            document.addEventListener('click', initAudioContext, { once: true });
+            document.addEventListener('touchstart', initAudioContext, { once: true });
+            
+            // Start the current time display
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+
+            // Set up event listeners
+            setupEventListeners();
+
+            // Request device orientation permission
+            setupOrientationDetection();
+        }
+
+        function initAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('🔊 Audio context initialized');
+            } catch (e) {
+                console.warn('Audio context not available:', e);
+            }
+        }
+
+        function setupEventListeners() {
+            // Alarm Clock events
+            document.getElementById('set-alarm-btn').addEventListener('click', setAlarm);
+            document.getElementById('cancel-alarm-btn').addEventListener('click', cancelAlarm);
+
+            // Timer events
+            document.getElementById('start-timer-btn').addEventListener('click', startTimer);
+            document.getElementById('pause-timer-btn').addEventListener('click', pauseTimer);
+            document.getElementById('reset-timer-btn').addEventListener('click', resetTimer);
+
+            // Stopwatch events
+            document.getElementById('start-stopwatch-btn').addEventListener('click', startStopwatch);
+            document.getElementById('stop-stopwatch-btn').addEventListener('click', stopStopwatch);
+            document.getElementById('reset-stopwatch-btn').addEventListener('click', resetStopwatch);
+
+            // Permission request
+            document.getElementById('request-permission-btn').addEventListener('click', requestPermissions);
+        }
+
+        // Device orientation detection
+        function setupOrientationDetection() {
+            if (typeof DeviceOrientationEvent !== 'undefined') {
+                // Check if permission is needed (iOS 13+)
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS - permission required
+                    document.getElementById('permission-prompt').style.display = 'block';
+                } else {
+                    // Android or older iOS - no permission needed
+                    startOrientationListening();
+                    document.getElementById('permission-prompt').style.display = 'none';
+                }
+            } else {
+                // Device orientation not supported
+                document.getElementById('permission-prompt').innerHTML = 
+                    '<p>Device orientation is not supported on this device. You can still use the app by manually selecting features!</p>' +
+                    '<button class="btn" onclick="showManualControls()">Show Manual Controls</button>';
+            }
+        }
+
+        function showManualControls() {
+            // Add manual navigation buttons for devices without orientation support
+            const manualControls = document.createElement('div');
+            manualControls.innerHTML = `
+                <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1000;">
+                    <button class="btn" onclick="switchScreen('alarm')" style="font-size: 0.9rem; padding: 8px 12px;">⏰</button>
+                    <button class="btn" onclick="switchScreen('timer')" style="font-size: 0.9rem; padding: 8px 12px;">⏱️</button>
+                    <button class="btn" onclick="switchScreen('stopwatch')" style="font-size: 0.9rem; padding: 8px 12px;">🏃</button>
+                    <button class="btn" onclick="switchScreen('default')" style="font-size: 0.9rem; padding: 8px 12px;">📱</button>
+                </div>
+            `;
+            document.body.appendChild(manualControls);
+        }
+
+        function requestPermissions() {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startOrientationListening();
+                            document.getElementById('permission-prompt').style.display = 'none';
+                            console.log('✅ Orientation permission granted');
+                        } else {
+                            alert('Permission denied. You can still use the app manually!');
+                            showManualControls();
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                startOrientationListening();
+                document.getElementById('permission-prompt').style.display = 'none';
+            }
+        }
+
+        function startOrientationListening() {
+            window.addEventListener('deviceorientation', handleOrientationChange);
+            console.log('🧭 Orientation detection started');
+        }
+
+        function handleOrientationChange(event) {
+            const beta = event.beta;   // Front-to-back tilt (-180 to 180)
+            const gamma = event.gamma; // Left-to-right tilt (-90 to 90)
+
+            // Update debug info
+            document.getElementById('debug-info').innerHTML = 
+                `Beta: ${Math.round(beta || 0)}°, Gamma: ${Math.round(gamma || 0)}°<br>Mode: ${currentScreen}`;
+
+            // Determine orientation and switch screens
+            let newScreen = determineScreen(beta, gamma);
+            
+            if (newScreen !== currentScreen) {
+                switchScreen(newScreen);
+            }
+        }
+
+        function determineScreen(beta, gamma) {
+            // Add tolerance for orientation detection
+            const tolerance = 30;
+
+            // Handle null values
+            if (beta === null || gamma === null) return 'default';
+
+            // Portrait upright: beta around 90°, gamma around 0°
+            if (beta > (90 - tolerance) && beta < (90 + tolerance) && 
+                Math.abs(gamma) < tolerance) {
+                return 'alarm';
+            }
+            
+            // Portrait upside down: beta around -90°, gamma around 0°
+            if (beta < (-90 + tolerance) && beta > (-90 - tolerance) && 
+                Math.abs(gamma) < tolerance) {
+                return 'timer';
+            }
+            
+            // Landscape right: beta around 0°, gamma around 90°
+            if (Math.abs(beta) < tolerance && 
+                gamma > (90 - tolerance) && gamma < (90 + tolerance)) {
+                return 'stopwatch';
+            }
+            
+            // Default (landscape left or other orientations)
+            return 'default';
+        }
+
+        function switchScreen(screenName) {
+            console.log(`🔄 Switching to ${screenName} screen`);
+            
+            // Hide all screens
+            document.querySelectorAll('.app-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show the target screen
+            const targetScreen = document.getElementById(screenName + '-screen');
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+                currentScreen = screenName;
+
+                // Perform screen-specific initialization
+                if (screenName === 'stopwatch' && !weatherLoaded) {
+                    loadWeather();
+                }
+            }
+        }
+
+        // Utility function to update current time
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            const currentTimeElement = document.getElementById('current-time');
+            if (currentTimeElement) {
+                currentTimeElement.textContent = timeString;
+            }
+        }
+
+        // Alarm Clock functionality
+        function setAlarm() {
+            const hour = parseInt(document.getElementById('alarm-hour').value);
+            const minute = parseInt(document.getElementById('alarm-minute').value);
+
+            if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                alert('Please enter valid time (HH:MM format, 24-hour)');
+                return;
+            }
+
+            const now = new Date();
+            alarmTime = new Date();
+            alarmTime.setHours(hour, minute, 0, 0);
+
+            // If alarm time is in the past, set for tomorrow
+            if (alarmTime <= now) {
+                alarmTime.setDate(alarmTime.getDate() + 1);
+            }
+
+            const timeUntilAlarm = alarmTime.getTime() - now.getTime();
+            
+            alarmTimeout = setTimeout(() => {
+                playAlarmSound();
+                alert('⏰ ALARM! Time: ' + alarmTime.toLocaleTimeString());
+                cancelAlarm();
+            }, timeUntilAlarm);
+
+            // Update UI
+            document.getElementById('set-alarm-btn').style.display = 'none';
+            document.getElementById('cancel-alarm-btn').style.display = 'inline-block';
+            document.getElementById('alarm-status').style.display = 'block';
+            document.getElementById('alarm-status').textContent = 
+                `Alarm set for ${alarmTime.toLocaleTimeString()}`;
+            
+            console.log('⏰ Alarm set for:', alarmTime.toLocaleTimeString());
+        }
+
+        function cancelAlarm() {
+            if (alarmTimeout) {
+                clearTimeout(alarmTimeout);
+                alarmTimeout = null;
+            }
+            alarmTime = null;
+
+            // Update UI
+            document.getElementById('set-alarm-btn').style.display = 'inline-block';
+            document.getElementById('cancel-alarm-btn').style.display = 'none';
+            document.getElementById('alarm-status').style.display = 'none';
+            
+            console.log('❌ Alarm cancelled');
+        }
+
+        // Timer functionality
+        function startTimer() {
+            const minutes = parseInt(document.getElementById('timer-minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('timer-seconds').value) || 0;
+
+            if (minutes === 0 && seconds === 0) {
+                alert('Please enter a valid time for the timer');
+                return;
+            }
+
+            timerDuration = (minutes * 60 + seconds) * 1000; // Convert to milliseconds
+            timerStartTime = Date.now();
+            timerPaused = false;
+
+            timerInterval = setInterval(updateTimer, 100);
+
+            // Update UI
+            document.getElementById('start-timer-btn').style.display = 'none';
+            document.getElementById('pause-timer-btn').style.display = 'inline-block';
+            document.getElementById('reset-timer-btn').style.display = 'inline-block';
+            
+            console.log('▶️ Timer started:', minutes, 'min', seconds, 'sec');
+        }
+
+        function pauseTimer() {
+            if (timerPaused) {
+                // Resume
+                timerStartTime = Date.now() - (timerDuration - timerRemaining);
+                timerInterval = setInterval(updateTimer, 100);
+                timerPaused = false;
+                document.getElementById('pause-timer-btn').textContent = 'Pause';
+                console.log('▶️ Timer resumed');
+            } else {
+                // Pause
+                clearInterval(timerInterval);
+                timerPaused = true;
+                document.getElementById('pause-timer-btn').textContent = 'Resume';
+                console.log('⏸️ Timer paused');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerPaused = false;
+
+            // Update UI
+            document.getElementById('timer-display').textContent = '00:00';
+            document.getElementById('timer-progress').style.width = '0%';
+            document.getElementById('start-timer-btn').style.display = 'inline-block';
+            document.getElementById('pause-timer-btn').style.display = 'none';
+            document.getElementById('reset-timer-btn').style.display = 'none';
+            document.getElementById('timer-status').style.display = 'none';
+            
+            console.log('🔄 Timer reset');
+        }
+
+        function updateTimer() {
+            const elapsed = Date.now() - timerStartTime;
+            timerRemaining = Math.max(0, timerDuration - elapsed);
+
+            if (timerRemaining <= 0) {
+                // Timer finished
+                clearInterval(timerInterval);
+                playAlarmSound();
+                alert('⏰ Timer finished!');
+                resetTimer();
+                return;
+            }
+
+            // Update display
+            const minutes = Math.floor(timerRemaining / 60000);
+            const seconds = Math.floor((timerRemaining % 60000) / 1000);
+            document.getElementById('timer-display').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Update progress bar
+            const progress = ((timerDuration - timerRemaining) / timerDuration) * 100;
+            document.getElementById('timer-progress').style.width = progress + '%';
+        }
+
+        // Stopwatch functionality
+        function startStopwatch() {
+            stopwatchStartTime = Date.now() - stopwatchElapsed;
+            stopwatchInterval = setInterval(updateStopwatch, 10);
+
+            // Update UI
+            document.getElementById('start-stopwatch-btn').style.display = 'none';
+            document.getElementById('stop-stopwatch-btn').style.display = 'inline-block';
+            
+            console.log('▶️ Stopwatch started');
+        }
+
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+
+            // Update UI
+            document.getElementById('start-stopwatch-btn').style.display = 'inline-block';
+            document.getElementById('stop-stopwatch-btn').style.display = 'none';
+            
+            console.log('⏹️ Stopwatch stopped');
+        }
+
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+            stopwatchElapsed = 0;
+
+            // Update display
+            document.getElementById('stopwatch-display').textContent = '00:00:00';
+
+            // Update UI
+            document.getElementById('start-stopwatch-btn').style.display = 'inline-block';
+            document.getElementById('stop-stopwatch-btn').style.display = 'none';
+            
+            console.log('🔄 Stopwatch reset');
+        }
+
+        function updateStopwatch() {
+            stopwatchElapsed = Date.now() - stopwatchStartTime;
+
+            const hours = Math.floor(stopwatchElapsed / 3600000);
+            const minutes = Math.floor((stopwatchElapsed % 3600000) / 60000);
+            const seconds = Math.floor((stopwatchElapsed % 60000) / 1000);
+
+            document.getElementById('stopwatch-display').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Weather functionality
+        function loadWeather() {
+            if (weatherLoaded) return;
+
+            const weatherInfo = document.getElementById('weather-info');
+            
+            if (navigator.geolocation) {
+                console.log('🌍 Requesting location for weather...');
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        console.log('📍 Location obtained:', lat, lon);
+                        fetchWeatherData(lat, lon);
+                    },
+                    error => {
+                        weatherInfo.innerHTML = `
+                            <div style="color: #ff6b6b;">
+                                Location access denied. Unable to load weather data.
+                            </div>
+                        `;
+                        console.error('Geolocation error:', error);
+                    },
+                    {
+                        timeout: 10000,
+                        enableHighAccuracy: true
+                    }
+                );
+            } else {
+                weatherInfo.innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        Geolocation is not supported by this browser.
+                    </div>
+                `;
+            }
+        }
+
+        function fetchWeatherData(lat, lon) {
+            const url = `${WEATHER_BASE_URL}?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`;
+            
+            console.log('🌤️ Fetching weather data...');
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Weather data received:', data);
+                    displayWeatherData(data);
+                    weatherLoaded = true;
+                })
+                .catch(error => {
+                    console.error('Weather API error:', error);
+                    document.getElementById('weather-info').innerHTML = `
+                        <div style="color: #ff6b6b;">
+                            Unable to load weather data. Please check your internet connection.
+                        </div>
+                    `;
+                });
+        }
+
+        function displayWeatherData(data) {
+            const temperature = Math.round(data.main.temp);
+            const description = data.weather[0].description;
+            const location = data.name;
+            const humidity = data.main.humidity;
+            const windSpeed = Math.round(data.wind.speed * 3.6); // Convert m/s to km/h
+
+            document.getElementById('weather-info').innerHTML = `
+                <div><strong>${location}</strong></div>
+                <div style="font-size: 2rem; margin: 10px 0;">${temperature}°C</div>
+                <div style="text-transform: capitalize; margin-bottom: 10px;">${description}</div>
+                <div>Humidity: ${humidity}%</div>
+                <div>Wind: ${windSpeed} km/h</div>
+            `;
+        }
+
+        // Audio functionality for alerts
+        function playAlarmSound() {
+            console.log('🔊 Playing alarm sound');
+            
+            if (!audioContext) {
+                console.warn('Audio context not available');
+                return;
+            }
+
+            // Create a series of beeps
+            playBeepSequence();
+        }
+
+        function playBeepSequence() {
+            playBeep(800, 0.5); // First beep
+            setTimeout(() => playBeep(1000, 0.3), 200);
+            setTimeout(() => playBeep(800, 0.5), 400);
+            setTimeout(() => playBeep(1000, 0.3), 600);
+        }
+
+        function playBeep(frequency = 800, duration = 0.3) {
+            if (!audioContext) return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (error) {
+                console.warn('Audio playback error:', error);
+            }
+        }
+
+        // Make switchScreen globally available for manual controls
+        window.switchScreen = switchScreen;
+    </script>
+</body>
+</html>
