@@ -776,11 +776,11 @@
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Weather functionality
-        function loadWeather() {
+        // Weather functionality for main weather screen
+        function loadWeatherMain() {
             if (weatherLoaded) return;
 
-            const weatherInfo = document.getElementById('weather-info');
+            const weatherInfo = document.getElementById('weather-info-main');
             
             if (navigator.geolocation) {
                 console.log('🌍 Requesting location for weather...');
@@ -789,12 +789,14 @@
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
                         console.log('📍 Location obtained:', lat, lon);
-                        fetchWeatherData(lat, lon);
+                        fetchWeatherDataMain(lat, lon);
                     },
                     error => {
                         weatherInfo.innerHTML = `
-                            <div style="color: #ff6b6b;">
-                                Location access denied. Unable to load weather data.
+                            <div style="color: #ff6b6b; text-align: center; padding: 20px;">
+                                <h3>Location Access Denied</h3>
+                                <p>Unable to load weather data without location access.</p>
+                                <button class="btn" onclick="loadWeatherMain()">Try Again</button>
                             </div>
                         `;
                         console.error('Geolocation error:', error);
@@ -806,14 +808,15 @@
                 );
             } else {
                 weatherInfo.innerHTML = `
-                    <div style="color: #ff6b6b;">
-                        Geolocation is not supported by this browser.
+                    <div style="color: #ff6b6b; text-align: center; padding: 20px;">
+                        <h3>Geolocation Not Supported</h3>
+                        <p>Your browser doesn't support location services.</p>
                     </div>
                 `;
             }
         }
 
-        function fetchWeatherData(lat, lon) {
+        function fetchWeatherDataMain(lat, lon) {
             const url = `${WEATHER_BASE_URL}?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`;
             
             console.log('🌤️ Fetching weather data...');
@@ -827,33 +830,66 @@
                 })
                 .then(data => {
                     console.log('✅ Weather data received:', data);
-                    displayWeatherData(data);
+                    displayWeatherDataMain(data);
                     weatherLoaded = true;
                 })
                 .catch(error => {
                     console.error('Weather API error:', error);
-                    document.getElementById('weather-info').innerHTML = `
-                        <div style="color: #ff6b6b;">
-                            Unable to load weather data. Please check your internet connection.
+                    document.getElementById('weather-info-main').innerHTML = `
+                        <div style="color: #ff6b6b; text-align: center; padding: 20px;">
+                            <h3>Weather Unavailable</h3>
+                            <p>Unable to load weather data. Please check your internet connection.</p>
+                            <button class="btn" onclick="loadWeatherMain()">Retry</button>
                         </div>
                     `;
                 });
         }
 
-        function displayWeatherData(data) {
+        function displayWeatherDataMain(data) {
             const temperature = Math.round(data.main.temp);
             const description = data.weather[0].description;
             const location = data.name;
             const humidity = data.main.humidity;
             const windSpeed = Math.round(data.wind.speed * 3.6); // Convert m/s to km/h
+            const feelsLike = Math.round(data.main.feels_like);
+            const weatherIcon = data.weather[0].icon;
 
-            document.getElementById('weather-info').innerHTML = `
-                <div><strong>${location}</strong></div>
-                <div style="font-size: 2rem; margin: 10px 0;">${temperature}°C</div>
-                <div style="text-transform: capitalize; margin-bottom: 10px;">${description}</div>
-                <div>Humidity: ${humidity}%</div>
-                <div>Wind: ${windSpeed} km/h</div>
+            document.getElementById('weather-info-main').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="margin-bottom: 20px;">
+                        <img src="https://openweathermap.org/img/wn/${weatherIcon}@4x.png" 
+                             alt="${description}" 
+                             style="width: 120px; height: 120px;">
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">${location}</div>
+                    <div style="font-size: 4rem; font-weight: 300; margin: 20px 0; color: #fff;">${temperature}°C</div>
+                    <div style="font-size: 1.3rem; text-transform: capitalize; margin-bottom: 30px; opacity: 0.9;">${description}</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;">
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Feels Like</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;">${feelsLike}°C</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Humidity</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;">${humidity}%</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Wind Speed</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;">${windSpeed} km/h</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; backdrop-filter: blur(10px);">
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Pressure</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;">${data.main.pressure} hPa</div>
+                        </div>
+                    </div>
+                </div>
             `;
+        }
+
+        // Keep original weather function for backward compatibility
+        function loadWeather() {
+            loadWeatherMain();
         }
 
         // Audio functionality for alerts
