@@ -529,26 +529,26 @@
 
             console.log(`🧭 Orientation: beta=${Math.round(beta)}°, gamma=${Math.round(gamma)}°`);
 
-            // Portrait upright: beta around 102°, gamma around 0°
-            if (beta > 80 && beta < 120 && Math.abs(gamma) < 20) {
+            // Portrait upright: device held normally, beta around 0°, gamma around 0°
+            if (beta > -30 && beta < 30 && gamma > -25 && gamma < 25) {
                 console.log('📱 Detected: Portrait Upright -> Alarm Clock');
                 return 'alarm';
             }
             
-            // Portrait upside down: beta around -102°, gamma around -14°
-            if (beta < -80 && beta > -120 && gamma > -30 && gamma < 5) {
+            // Portrait upside down: device flipped 180°, beta around ±180°, gamma around 0° (may be inverted)
+            if ((beta > 150 && beta <= 180) || (beta < -150 && beta >= -180)) {
                 console.log('📱 Detected: Portrait Upside Down -> Timer');
                 return 'timer';
             }
             
-            // Landscape right: beta around 179°, gamma around 82°
-            if (beta > 160 && beta <= 180 && gamma > 65 && gamma < 100) {
+            // Landscape right: device rotated clockwise 90°, beta around 0°, gamma around 90°
+            if (beta > -30 && beta < 30 && gamma > 60 && gamma <= 90) {
                 console.log('📱 Detected: Landscape Right -> Stopwatch');
                 return 'stopwatch';
             }
             
-            // Landscape left: beta around -175°, gamma around 85°
-            if (beta < -160 && beta >= -180 && gamma > 70 && gamma < 100) {
+            // Landscape left: device rotated counter-clockwise 90°, beta around 0°, gamma around -90°
+            if (beta > -30 && beta < 30 && gamma < -60 && gamma >= -90) {
                 console.log('📱 Detected: Landscape Left -> Weather');
                 return 'weather';
             }
