@@ -547,15 +547,15 @@
             // Landscape right: beta around 0°, gamma around 90°
             if (Math.abs(beta) < tolerance && 
                 gamma > (90 - tolerance) && gamma <= 90) {
-                console.log('📱 Detected: Landscape Right -> Stopwatch + Weather');
+                console.log('📱 Detected: Landscape Right -> Stopwatch');
                 return 'stopwatch';
             }
             
             // Landscape left: beta around 0°, gamma around -90°
             if (Math.abs(beta) < tolerance && 
                 gamma < (-90 + tolerance) && gamma >= -90) {
-                console.log('📱 Detected: Landscape Left -> Guide');
-                return 'default';
+                console.log('📱 Detected: Landscape Left -> Weather');
+                return 'weather';
             }
             
             // For testing purposes, allow manual screen switching when no clear orientation detected
