@@ -512,25 +512,30 @@
             // Handle null values
             if (beta === null || gamma === null) return 'default';
 
-            // Portrait upright: beta around 90°, gamma around 0°
-            if (beta > (90 - tolerance) && beta < (90 + tolerance) && 
-                Math.abs(gamma) < tolerance) {
+            // Portrait upright: beta around 0°, gamma around 0°
+            if (Math.abs(beta) < tolerance && Math.abs(gamma) < tolerance) {
                 return 'alarm';
             }
             
-            // Portrait upside down: beta around -90°, gamma around 0°
-            if (beta < (-90 + tolerance) && beta > (-90 - tolerance) && 
+            // Portrait upside down: beta around 180° or -180°, gamma around 0°
+            if ((Math.abs(beta) > (180 - tolerance) || Math.abs(beta) > (180 - tolerance)) && 
                 Math.abs(gamma) < tolerance) {
                 return 'timer';
             }
             
             // Landscape right: beta around 0°, gamma around 90°
             if (Math.abs(beta) < tolerance && 
-                gamma > (90 - tolerance) && gamma < (90 + tolerance)) {
+                gamma > (90 - tolerance) && gamma <= 90) {
                 return 'stopwatch';
             }
             
-            // Default (landscape left or other orientations)
+            // Landscape left: beta around 0°, gamma around -90°
+            if (Math.abs(beta) < tolerance && 
+                gamma < (-90 + tolerance) && gamma >= -90) {
+                return 'default';
+            }
+            
+            // Default for any other orientation
             return 'default';
         }
 
