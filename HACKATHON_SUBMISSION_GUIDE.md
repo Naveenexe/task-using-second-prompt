@@ -41,13 +41,30 @@ Develop a one-page mobile-friendly web application that detects device orientati
 
 #### **1. Device Orientation Detection**
 ```javascript
-// Corrected Device Orientation API Implementation
+// Standard Device Orientation API Implementation
 function determineScreen(beta, gamma) {
-    const tolerance = 45; // Optimized tolerance
+    const tolerance = 15; // ±15° tolerance for device variations
     
-    // Portrait upright: beta ≈ 0°, gamma ≈ 0°
-    if (Math.abs(beta) < tolerance && Math.abs(gamma) < tolerance) {
+    // Portrait upright: β≈+90°, γ≈0°
+    if (beta > 75 && beta < 105 && Math.abs(gamma) < tolerance) {
         return 'alarm'; // Alarm Clock
+    }
+    
+    // Portrait upside down: β≈-90°, γ≈0°
+    if (beta < -75 && beta > -105 && Math.abs(gamma) < tolerance) {
+        return 'timer'; // Timer
+    }
+    
+    // Landscape right: β≈0°, γ≈-90°
+    if (Math.abs(beta) < tolerance && gamma < -75 && gamma > -105) {
+        return 'stopwatch'; // Stopwatch
+    }
+    
+    // Landscape left: β≈0°, γ≈+90°
+    if (Math.abs(beta) < tolerance && gamma > 75 && gamma < 105) {
+        return 'weather'; // Weather
+    }
+}
     }
     
     // Portrait upside down: beta ≈ ±180°, gamma ≈ 0°
